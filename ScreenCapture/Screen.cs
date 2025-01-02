@@ -124,7 +124,7 @@ public unsafe class Screen : IDisposable
                 // lost access
                 InitializeDuplicator();
             }
-            else Console.WriteLine($"Failed to acquire frame, result: {result}");
+            else Console.WriteLine($"ScreenCapture->Screen: Failed to acquire frame, result: {result}");
         }
 
         PASS:

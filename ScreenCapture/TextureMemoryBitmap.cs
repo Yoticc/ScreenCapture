@@ -18,5 +18,5 @@ public unsafe class TextureMemoryBitmap
 [StructLayout(LayoutKind.Sequential, Size = 4)]
 public unsafe struct TexturePixel 
 {
-    public byte R, G, B, A;
+    public byte B, G, R, A;
 }
