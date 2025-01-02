@@ -6,7 +6,7 @@ public unsafe struct HResult
 {
     public uint Code;
 
-    public bool Success => Code >= 0;
+    public bool Success => Code == 0;
 
     public void CheckResult()
     {
@@ -17,4 +17,5 @@ public unsafe struct HResult
     public override string ToString() => $"{Code:X8}";
 
     public static implicit operator bool(HResult self) => self.Success;
+    public static implicit operator uint(HResult self) => self.Code;
 }

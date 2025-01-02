@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Threading;
 using static System.Runtime.InteropServices.LayoutKind;
 
@@ -26,7 +27,9 @@ public unsafe static class DirectX
     );
 
     [DllImport(dxgi)]
-    public static extern HResult CreateDXGIFactory1(IID iid, IDXGIFactory1* factory);    
+    public static extern HResult CreateDXGIFactory1(IID iid, IDXGIFactory1* factory);
+
+    public static HResult CreateDXGIFactory1(IDXGIFactory1* factory) => CreateDXGIFactory1(GUID.IDXGIFactory1, factory);
 }
 
 public static class GUID
@@ -44,6 +47,12 @@ public static class GUID
         IDXGIOutputDuplication = "191cfac3-a341-470d-b26e-a864f428319c",
         IDXGIDeviceSubObject = "3d3e0379-f9de-4d58-bb6c-18d62992f1a6",
         IDXGIResource = "035f3ab4-482e-4e50-b41f-8a7f8bd8960b";
+
+    public static readonly Dictionary<Type, IID> TypeToIIDDictionary = 
+        typeof(GUID)
+        .GetFields()
+        .Where(field => field.FieldType == typeof(IID))
+        .ToDictionary(field => Type.GetType($"ScreenCapture.Internal.{field.Name}")!, field => (IID)field.GetValue(null)!);
 }
 
 public unsafe static partial class Extensions
@@ -65,14 +74,22 @@ public unsafe interface IIUnknown
     nint this[int index] => VirtualTable[index];
 }
 [StructLayout(Sequential, Size = 8)]
-public unsafe struct IUnknown : IIUnknown
+public unsafe struct IUnknown : IIUnknown, IDisposable
 {
     public nint* InternalIUnknown;
+
+    public void Dispose() => this.Release();
 }
 unsafe partial class Extensions
 {
-    public static HResult QueryInterface(this IIUnknown self, IID iid, void* obj) 
+    public static HResult QueryInterface(this IIUnknown self, IID iid, void* obj)
         => ((delegate* unmanaged[Stdcall]<IUnknown, IID*, void*, HResult>)self[0])(self.AsUnknown, &iid, obj);
+
+    public static HResult QueryInterface<T>(this IIUnknown self, void* obj) where T : IIUnknown
+        => self.QueryInterface(GUID.TypeToIIDDictionary[typeof(T)], obj);
+
+    public static HResult Release(this IIUnknown self)
+        => ((delegate* unmanaged[Stdcall]<IUnknown, HResult>)self[2])(self.AsUnknown);
 }
 
 public interface IIDXGIObject : IIUnknown;
