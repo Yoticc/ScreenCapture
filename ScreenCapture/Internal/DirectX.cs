@@ -1,7 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using ScreenCapture.DirectXModels;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Threading;
 using static System.Runtime.InteropServices.LayoutKind;
 
 namespace ScreenCapture.Internal;
@@ -15,14 +13,14 @@ public unsafe static class DirectX
     [DllImport(d3d11)]
     public static extern HResult D3D11CreateDevice(
         IDXGIAdapter* adapter = null,
-        D3DDriverType driverType = D3DDriverType.Null,
+        DriverType driverType = DriverType.Null,
         nint software = 0,
         uint flags = 0,
-        D3DFeatureLevel* featureLevels = null,
+        FeatureLevel* featureLevels = null,
         uint featureLevelsCount = 0,
         uint sdkVersion = D3D11_SDK_VERSION,
         ID3D11Device* device = null,
-        D3DFeatureLevel* featureLevel = null,
+        FeatureLevel* featureLevel = null,
         ID3D11DeviceContext* context = null
     );
 
@@ -46,7 +44,8 @@ public static class GUID
         IDXGIFactory1 = "770aae78-f26f-4dba-a829-253c83d1b387",
         IDXGIOutputDuplication = "191cfac3-a341-470d-b26e-a864f428319c",
         IDXGIDeviceSubObject = "3d3e0379-f9de-4d58-bb6c-18d62992f1a6",
-        IDXGIResource = "035f3ab4-482e-4e50-b41f-8a7f8bd8960b";
+        IDXGIResource = "035f3ab4-482e-4e50-b41f-8a7f8bd8960b",
+        ID3D11Texture2D = "6f15aaf2-d208-4e89-9ab4-489535d34f9c";
 
     public static readonly Dictionary<Type, IID> TypeToIIDDictionary = 
         typeof(GUID)
@@ -83,13 +82,13 @@ public unsafe struct IUnknown : IIUnknown, IDisposable
 unsafe partial class Extensions
 {
     public static HResult QueryInterface(this IIUnknown self, IID iid, void* obj)
-        => ((delegate* unmanaged[Stdcall]<IUnknown, IID*, void*, HResult>)self[0])(self.AsUnknown, &iid, obj);
+        => ((delegate* unmanaged<IUnknown, IID*, void*, HResult>)self[0])(self.AsUnknown, &iid, obj);
 
     public static HResult QueryInterface<T>(this IIUnknown self, void* obj) where T : IIUnknown
         => self.QueryInterface(GUID.TypeToIIDDictionary[typeof(T)], obj);
 
     public static HResult Release(this IIUnknown self)
-        => ((delegate* unmanaged[Stdcall]<IUnknown, HResult>)self[2])(self.AsUnknown);
+        => ((delegate* unmanaged<IUnknown, HResult>)self[2])(self.AsUnknown);
 }
 
 public interface IIDXGIObject : IIUnknown;
@@ -105,24 +104,73 @@ public struct IDXGIAdapter : IIDXGIAdapter { }
 unsafe partial class Extensions
 {
     public static HResult EnumOutputs(this IIDXGIAdapter self, uint outputIndex, IDXGIOutput* output) 
-        => ((delegate* unmanaged[Stdcall]<IDXGIAdapter, uint, IDXGIOutput*, HResult>)self[7])(self.AsAdapter, outputIndex, output);
+        => ((delegate* unmanaged<IDXGIAdapter, uint, IDXGIOutput*, HResult>)self[7])(self.AsAdapter, outputIndex, output);
 }
 
-public interface IID3D11Device : IIUnknown;
+public interface IID3D11Device : IIUnknown
+{
+    ID3D11Device AsDevice => this.Cast<ID3D11Device>();
+}
 [StructLayout(Sequential, Size = 8)]
 public struct ID3D11Device : IID3D11Device;
+unsafe partial class Extensions
+{
+    public static HResult CreateTexture2D(this IID3D11Device self, Texture2DDescription* description, ID3D11Texture2D* texture) 
+        => CreateTexture2D(self.AsDevice, description, (SubresourceData*)null, texture);
+
+    public static HResult CreateTexture2D(this IID3D11Device self, Texture2DDescription* description, SubresourceData[] data, ID3D11Texture2D* texture)
+    {
+        fixed (SubresourceData* dataPointer = data)
+            return CreateTexture2D(self.AsDevice, description, dataPointer, texture);
+    }
+
+    public static HResult CreateTexture2D(this IID3D11Device self, Texture2DDescription* description, SubresourceData* data, ID3D11Texture2D* texture)
+        => ((delegate* unmanaged<ID3D11Device, Texture2DDescription*, SubresourceData*, ID3D11Texture2D*, HResult>)self[5])(self.AsDevice, description, data, texture);
+}
 
 public interface IID3D11DeviceChild : IIUnknown;
 [StructLayout(Sequential, Size = 8)]
 public struct ID3D11DeviceChild : IID3D11DeviceChild;
 
-public interface IID3D11DeviceContext : IID3D11DeviceChild;
+public interface IID3D11DeviceContext : IID3D11DeviceChild
+{
+    ID3D11DeviceContext AsDeviceContext => this.Cast<ID3D11DeviceContext>();
+}
 [StructLayout(Sequential, Size = 8)]
 public struct ID3D11DeviceContext : IID3D11DeviceContext;
+unsafe partial class Extensions
+{
+    public static HResult CopyResource(this IID3D11DeviceContext self, IIDXGIResource source, IIDXGIResource destination)
+        => self.CopyResource(source.AsResource, destination.AsResource);
 
-public interface IIDXGIOutput : IIDXGIObject;
+    public static HResult CopyResource(this IID3D11DeviceContext self, IDXGIResource source, IDXGIResource destination)
+        => ((delegate* unmanaged<ID3D11DeviceContext, IDXGIResource, IDXGIResource, HResult>)self[47])(self.AsDeviceContext, destination, source);
+
+    public static HResult Map(this IID3D11DeviceContext self, IIDXGIResource resource, uint subresource, MapType mapType, MapFlags mapFlags, SubresourceData* data)
+        => self.Map(resource.AsResource, subresource, mapType, mapFlags, data);
+
+    public static HResult Map(this IID3D11DeviceContext self, IDXGIResource resource, uint subresource, MapType mapType, MapFlags mapFlags, SubresourceData* data)
+        => ((delegate* unmanaged<ID3D11DeviceContext, IDXGIResource, uint, MapType, MapFlags, SubresourceData*, HResult>)self[14])
+           (self.AsDeviceContext, resource, subresource, mapType, mapFlags, data);
+
+    public static HResult Unmap(this IID3D11DeviceContext self, IIDXGIResource resource, uint subresource)
+        => Unmap(self, resource.AsResource, subresource);
+
+    public static HResult Unmap(this IID3D11DeviceContext self, IDXGIResource resource, uint subresource)
+        => ((delegate* unmanaged<ID3D11DeviceContext, IDXGIResource, uint, HResult>)self[15])(self.AsDeviceContext, resource, subresource);
+}
+
+public interface IIDXGIOutput : IIDXGIObject
+{
+    IDXGIOutput AsOutput => this.Cast<IDXGIOutput>();
+}
 [StructLayout(Sequential, Size = 8)]
 public struct IDXGIOutput : IIDXGIOutput;
+unsafe partial class Extensions
+{
+    public static HResult GetDescription(this IIDXGIOutput self, OutputDescription* description)
+        => ((delegate* unmanaged<IDXGIOutput, OutputDescription*, HResult>)self[7])(self.AsOutput, description);
+}
 
 public interface IIDXGIOutput1 : IIDXGIOutput 
 {
@@ -133,7 +181,7 @@ public struct IDXGIOutput1 : IIDXGIOutput1;
 unsafe partial class Extensions
 {
     public static HResult DuplicateOutput(this IIDXGIOutput1 self, ID3D11Device device, IDXGIOutputDuplication* duplicator) 
-        => ((delegate* unmanaged[Stdcall]<IDXGIOutput1, ID3D11Device, IDXGIOutputDuplication*, HResult>)self[22])(self.AsOutput1, device, duplicator);
+        => ((delegate* unmanaged<IDXGIOutput1, ID3D11Device, IDXGIOutputDuplication*, HResult>)self[22])(self.AsOutput1, device, duplicator);
 }
 
 public unsafe interface IIDXGIFactory : IIDXGIObject
@@ -145,7 +193,7 @@ public struct IDXGIFactory : IIDXGIFactory;
 unsafe partial class Extensions
 {
     public static HResult EnumAdapters(this IIDXGIFactory self, uint adapterIndex, IDXGIAdapter* adapter) 
-        => ((delegate* unmanaged[Stdcall]<IDXGIFactory, uint, IDXGIAdapter*, HResult>)self[7])(self.AsFactory, adapterIndex, adapter);
+        => ((delegate* unmanaged<IDXGIFactory, uint, IDXGIAdapter*, HResult>)self[7])(self.AsFactory, adapterIndex, adapter);
 }
 
 public interface IIDXGIFactory1 : IIDXGIFactory;
@@ -161,45 +209,23 @@ public struct IDXGIOutputDuplication : IIDXGIOutputDuplication;
 unsafe partial class Extensions
 {
     public static HResult AcquireNextFrame(this IIDXGIOutputDuplication self, uint timeout, OutDuplFrameInfo* frameInfo, IDXGIResource* resource)
-        => ((delegate* unmanaged[Stdcall]<IDXGIOutputDuplication, uint, OutDuplFrameInfo*, IDXGIResource*, HResult>)self[8])(self.AsOutputDuplication, timeout, frameInfo, resource);
+        => ((delegate* unmanaged<IDXGIOutputDuplication, uint, OutDuplFrameInfo*, IDXGIResource*, HResult>)self[8])(self.AsOutputDuplication, timeout, frameInfo, resource);
 
     public static HResult ReleaseFrame(this IIDXGIOutputDuplication self) 
-        => ((delegate* unmanaged[Stdcall]<IDXGIOutputDuplication, HResult>)self[14])(self.AsOutputDuplication);
+        => ((delegate* unmanaged<IDXGIOutputDuplication, HResult>)self[14])(self.AsOutputDuplication);
 }
 
 public interface IIDXGIDeviceSubObject : IIDXGIObject;
 [StructLayout(Sequential, Size = 8)]
 public struct IDXGIDeviceSubObject : IIDXGIDeviceSubObject;
 
-public interface IIDXGIResource : IIDXGIDeviceSubObject;
+public interface IIDXGIResource : IIDXGIDeviceSubObject
+{
+    IDXGIResource AsResource => this.Cast<IDXGIResource>();
+}
 [StructLayout(Sequential, Size = 8)]
-public struct IDXGIResource : IIDXGIResource
-{
-    
-}
+public struct IDXGIResource : IIDXGIResource;
 
-public enum D3DDriverType
-{
-    Unknown,
-    Hardware,
-    Reference,
-    Null,
-    Software,
-    Warp,
-}
-
-public enum D3DFeatureLevel
-{
-    Level1_0_Generic = 0x100,
-    Level1_0_Core = 0x1000,
-    Level9_1 = 0x9100,
-    Level9_2 = 0x9200,
-    Level9_3 = 0x9300,
-    Level10_0 = 0xa000,
-    Level10_1 = 0xa100,
-    Level11_0 = 0xb000,
-    Level11_1 = 0xb100,
-    Level12_0 = 0xc000,
-    Level12_1 = 0xc100,
-    Level12_2 = 0xc200
-}
+public interface IID3D11Texture2D : IIDXGIResource;
+[StructLayout(Sequential, Size = 8)]
+public struct ID3D11Texture2D : IID3D11Texture2D;

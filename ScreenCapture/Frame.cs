@@ -1,12 +1,12 @@
-﻿using ScreenCapture.Internal;
-
-namespace ScreenCapture;
+﻿namespace ScreenCapture;
 public class Frame
 {
-    public Frame(OutDuplFrameInfo frameInfo)
+    public Frame(OutDuplFrameInfo frameInfo, TextureMemoryBitmap bitmap)
     {
-
+        FrameInfo = frameInfo;
+        Bitmap = bitmap;
     }
 
-    public OutDuplFrameInfo DirectXFrameInfo;
+    public OutDuplFrameInfo FrameInfo;
+    public TextureMemoryBitmap Bitmap;
 }

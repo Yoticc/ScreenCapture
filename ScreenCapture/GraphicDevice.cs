@@ -1,4 +1,5 @@
-﻿using ScreenCapture.Internal;
+﻿using ScreenCapture.DirectXModels;
+using ScreenCapture.Internal;
 
 namespace ScreenCapture;
 public unsafe class GraphicDevice : IDisposable
@@ -9,10 +10,10 @@ public unsafe class GraphicDevice : IDisposable
 
         ID3D11Device device;
         ID3D11DeviceContext context;
-        D3DFeatureLevel featureLevel;
+        FeatureLevel featureLevel;
 
         DirectX.D3D11CreateDevice(
-            driverType: D3DDriverType.Hardware,
+            driverType: DriverType.Hardware,
             featureLevel: &featureLevel,
             context: &context,
             device: &device
@@ -34,7 +35,7 @@ public unsafe class GraphicDevice : IDisposable
 
     public readonly ID3D11Device Device;
     public readonly ID3D11DeviceContext Context;
-    public readonly D3DFeatureLevel FeatureLevel;
+    public readonly FeatureLevel FeatureLevel;
     public readonly IDXGIFactory1 Factory;
     public readonly IDXGIAdapter Adapter;
 

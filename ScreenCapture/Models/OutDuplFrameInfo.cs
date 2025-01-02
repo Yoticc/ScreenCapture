@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ScreenCapture.Internal;
+namespace ScreenCapture;
 [StructLayout(LayoutKind.Explicit, Size = 0x30)]
 public unsafe struct OutDuplFrameInfo
 {

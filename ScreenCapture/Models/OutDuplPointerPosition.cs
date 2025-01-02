@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace ScreenCapture.Internal;
+namespace ScreenCapture;
 [StructLayout(LayoutKind.Sequential, Size = 0x0C, Pack = 1)]
 public struct OutDuplPointerPosition
 {

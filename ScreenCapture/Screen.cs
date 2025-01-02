@@ -1,4 +1,6 @@
-﻿using ScreenCapture.Internal;
+﻿using ScreenCapture.DirectXModels;
+using ScreenCapture.Internal;
+using System;
 
 namespace ScreenCapture;
 public unsafe class Screen : IDisposable
@@ -8,28 +10,57 @@ public unsafe class Screen : IDisposable
         ScreenID = index;
         Device = device;
 
+        Initialize();
+        InitializeDuplicator();
+    }
+
+    public readonly uint ScreenID;
+    public readonly GraphicDevice Device;
+    bool initialized;
+
+    public uint FrameWaitInterval = 1000;
+
+    IDXGIOutput Output0;
+    ID3D11Texture2D texture;
+    Texture2DDescription textureDescription;
+    public IDXGIOutput1 Output { get; private set; }
+    public IDXGIOutputDuplication Duplicator { get; private set; }
+
+    void Initialize()
+    {
         IDXGIOutput output;
-        Device.Adapter.EnumOutputs(index, &output).CheckResult();
+        Device.Adapter.EnumOutputs(ScreenID, &output).CheckResult();
         Output0 = output;
 
         IDXGIOutput1 output1;
         Output0.QueryInterface<IDXGIOutput1>(&output1).CheckResult();
         Output = output1;
 
-        Initialize();
+        OutputDescription outputDescription;
+        Output.GetDescription(&outputDescription).CheckResult();
+        var bounds = outputDescription.DesktopBounds;
+
+        var textureDescription = new Texture2DDescription
+        {
+            CpuAccessFlags = CpuAccessFlags.ReadWrite,
+            BindFlags = BindFlags.None,
+            Format = FormatType.B8G8R8A8_UNorm,
+            Width = bounds.Width,
+            Height = bounds.Height,
+            ResourceOptionFlags = ResourceOptionFlags.None,
+            MipLevels = 1,
+            ArraySize = 1,
+            SampleDescription = new(1, 0),
+            Usage = Usage.Staging
+        };
+
+        ID3D11Texture2D texture;
+        Device.Device.CreateTexture2D(&textureDescription, &texture).CheckResult();
+        this.texture = texture;
+        this.textureDescription = textureDescription;
     }
 
-    public readonly uint ScreenID;
-    public readonly GraphicDevice Device;
-    readonly IDXGIOutput Output0;
-    public readonly IDXGIOutput1 Output;
-
-    public uint FrameWaitInterval = 1000;
-
-    bool initialized;
-    public IDXGIOutputDuplication Duplicator { get; private set; }
-
-    public void Initialize()
+    void InitializeDuplicator()
     {
         if (initialized)
         {
@@ -55,15 +86,11 @@ public unsafe class Screen : IDisposable
         const uint DXGI_ERROR_ACCESS_LOST = 0x887A0026;
         const uint DXGI_ERROR_WAIT_TIMEOUT = 0x887A0027;
 
-        if (hasPreviousFrame)
-        {
-            hasPreviousFrame = false;
-            Duplicator.ReleaseFrame().CheckResult();
-        }
+        DisposePreviousFrame();
 
         OutDuplFrameInfo frame;
-        IDXGIResource resource;
-        var result = Duplicator.AcquireNextFrame(FrameWaitInterval, &frame, &resource);
+        IDXGIResource frameResource;
+        var result = Duplicator.AcquireNextFrame(FrameWaitInterval, &frame, &frameResource);
         if (result)
         {
             hasPreviousFrame = true;
@@ -71,7 +98,18 @@ public unsafe class Screen : IDisposable
             {
                 lastPresentTime = frame.LastPresentTime;
 
-                outputFrame = new(frame);
+                ID3D11Texture2D frameTexture;
+                result = frameResource.QueryInterface<ID3D11Texture2D>(&frameTexture);
+                if (!result)
+                    goto PASS;
+
+                Device.Context.CopyResource(frameTexture, texture).CheckResult();
+                SubresourceData subresource;
+                Device.Context.Map(texture, 0, MapType.Read, MapFlags.None, &subresource).CheckResult();
+
+                var bitmap = new TextureMemoryBitmap((TexturePixel*)subresource.Data, (int)textureDescription.Width, (int)textureDescription.Height);
+
+                outputFrame = new(frame, bitmap);
                 return true;
             }
         }
@@ -84,16 +122,28 @@ public unsafe class Screen : IDisposable
             else if (result == DXGI_ERROR_ACCESS_LOST)
             {
                 // lost access
-                Initialize();
+                InitializeDuplicator();
             }
             else Console.WriteLine($"Failed to acquire frame, result: {result}");
         }
 
+        PASS:
         outputFrame = null!;
         return false;
     }
 
     #region IDispose
+    void DisposePreviousFrame()
+    {
+        if (!hasPreviousFrame)
+            return;
+
+        hasPreviousFrame = false;
+        Device.Context.Unmap(texture, 0).CheckResult();
+
+        Duplicator.ReleaseFrame().CheckResult();
+    }
+
     bool disposed;
     public void Dispose()
     {
@@ -101,7 +151,10 @@ public unsafe class Screen : IDisposable
             return;
         disposed = true;
 
+        DisposePreviousFrame();
+        
         Output.Release();
+        texture.Release();
 
         if (initialized)
         {
