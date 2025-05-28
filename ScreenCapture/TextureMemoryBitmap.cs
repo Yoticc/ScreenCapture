@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 
 namespace ScreenCapture;
-public unsafe class TextureMemoryBitmap
+public unsafe struct TextureMemoryBitmap
 {
     public TextureMemoryBitmap(TexturePixel* pixels, int width, int height)
     {
@@ -16,7 +16,7 @@ public unsafe class TextureMemoryBitmap
 }
 
 [StructLayout(LayoutKind.Sequential, Size = 4)]
-public unsafe struct TexturePixel 
+public unsafe struct TexturePixel
 {
     public byte B, G, R, A;
 }

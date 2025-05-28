@@ -2,6 +2,7 @@
 using System.Runtime.InteropServices;
 using static System.Runtime.InteropServices.LayoutKind;
 
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 namespace ScreenCapture.Internal;
 public unsafe static class DirectX
 {
@@ -56,7 +57,7 @@ public static class GUID
 
 public unsafe static partial class Extensions
 {
-    public static T Cast<T>(this IIUnknown self) where T : IIUnknown => *(T*)((nint*)*(nint*)&self + 1);
+    public static T Cast<T>(this IIUnknown self) where T : IIUnknown => *(T*)(*(nint**)&self + 1);
 }
 
 public unsafe interface IIUnknown

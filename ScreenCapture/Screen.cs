@@ -1,6 +1,5 @@
 ﻿using ScreenCapture.DirectXModels;
 using ScreenCapture.Internal;
-using System;
 
 namespace ScreenCapture;
 public unsafe class Screen : IDisposable
@@ -100,17 +99,17 @@ public unsafe class Screen : IDisposable
 
                 ID3D11Texture2D frameTexture;
                 result = frameResource.QueryInterface<ID3D11Texture2D>(&frameTexture);
-                if (!result)
-                    goto PASS;
+                if (result)
+                {
+                    Device.Context.CopyResource(frameTexture, texture).CheckResult();
+                    SubresourceData subresource;
+                    Device.Context.Map(texture, 0, MapType.Read, MapFlags.None, &subresource).CheckResult();
 
-                Device.Context.CopyResource(frameTexture, texture).CheckResult();
-                SubresourceData subresource;
-                Device.Context.Map(texture, 0, MapType.Read, MapFlags.None, &subresource).CheckResult();
+                    var bitmap = new TextureMemoryBitmap((TexturePixel*)subresource.Data, (int)textureDescription.Width, (int)textureDescription.Height);
 
-                var bitmap = new TextureMemoryBitmap((TexturePixel*)subresource.Data, (int)textureDescription.Width, (int)textureDescription.Height);
-
-                outputFrame = new(frame, bitmap);
-                return true;
+                    outputFrame = new(frame, bitmap);
+                    return true;
+                }
             }
         }
         else
@@ -127,7 +126,6 @@ public unsafe class Screen : IDisposable
             else Console.WriteLine($"ScreenCapture->Screen: Failed to acquire frame, result: {result}");
         }
 
-        PASS:
         outputFrame = null!;
         return false;
     }
