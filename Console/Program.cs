@@ -1,13 +1,18 @@
 ﻿using ScreenCapture;
+using ScreenCapture.Internal;
 
-var device = new GraphicDevice();
-var screen = new Screen(device);
-
-int counter = 0;
-while (true)
+unsafe
 {
-    if (screen.CaptureFrame(out Frame frame))
+    using var capturer = new ScreenCapturer();
+
+    int counter = 0;
+    Frame frame;
+    HResult result;
+    while (true)
     {
-        Console.WriteLine($"Got {++counter}-th frame!");
+        counter++;
+        if (result = capturer.CaptureFrame(&frame))
+            Console.WriteLine($"Captured {counter}-th frame!");
+        else Console.WriteLine($"Failed to capture {counter}-th frame. HResult: {result}");
     }
 }

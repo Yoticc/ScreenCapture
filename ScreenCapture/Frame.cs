@@ -1,8 +1,6 @@
 ﻿namespace ScreenCapture;
-public class Frame
+public struct Frame
 {
-    public Frame(OutDuplFrameInfo frameInfo, TextureMemoryBitmap bitmap) => (FrameInfo, Bitmap) = (frameInfo, bitmap);
-
     public OutDuplFrameInfo FrameInfo;
     public TextureMemoryBitmap Bitmap;
 }

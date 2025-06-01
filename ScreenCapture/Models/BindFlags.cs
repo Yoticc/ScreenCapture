@@ -1,5 +1,4 @@
 ﻿namespace ScreenCapture.DirectXModels;
-[Flags]
 public enum BindFlags
 {
     None = 0x00,

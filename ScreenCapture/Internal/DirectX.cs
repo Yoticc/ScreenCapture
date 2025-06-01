@@ -28,31 +28,27 @@ public unsafe static class DirectX
     [DllImport(dxgi)]
     public static extern HResult CreateDXGIFactory1(IID iid, IDXGIFactory1* factory);
 
-    public static HResult CreateDXGIFactory1(IDXGIFactory1* factory) => CreateDXGIFactory1(GUID.IDXGIFactory1, factory);
+    public static HResult CreateDXGIFactory1(IDXGIFactory1* factory) => CreateDXGIFactory1(GUID.IIDS[typeof(IDXGIFactory1)], factory);
 }
 
 public static class GUID
 {
-    public static readonly IID
-        IUnknown = "00000000-0000-0000-C000-000000000046",
-        IDXGIObject = "aec22fb8-76f3-4639-9be0-28eb43a67a2e",
-        IDXGIAdapter = "2411e7e1-12ac-4ccf-bd14-9798e8534dc0",
-        ID3D11Device = "db6f6ddb-ac77-4e88-8253-819df9bbf140",
-        ID3D11DeviceContext = "c0bfa96c-e089-44fb-8eaf-26f8796190da",
-        IDXGIOutput = "ae02eedb-c735-4690-8d52-5a8dc20213aa",
-        IDXGIOutput1 = "00cddea8-939b-4b83-a340-a685226666cc",
-        IDXGIFactory = "7b7166ec-21c7-44ae-b21a-c9ae321ae369",
-        IDXGIFactory1 = "770aae78-f26f-4dba-a829-253c83d1b387",
-        IDXGIOutputDuplication = "191cfac3-a341-470d-b26e-a864f428319c",
-        IDXGIDeviceSubObject = "3d3e0379-f9de-4d58-bb6c-18d62992f1a6",
-        IDXGIResource = "035f3ab4-482e-4e50-b41f-8a7f8bd8960b",
-        ID3D11Texture2D = "6f15aaf2-d208-4e89-9ab4-489535d34f9c";
-
-    public static readonly Dictionary<Type, IID> TypeToIIDDictionary = 
-        typeof(GUID)
-        .GetFields()
-        .Where(field => field.FieldType == typeof(IID))
-        .ToDictionary(field => Type.GetType($"ScreenCapture.Internal.{field.Name}")!, field => (IID)field.GetValue(null)!);
+    public static readonly Dictionary<Type, IID> IIDS = new()
+    {
+        { typeof(IUnknown),               "00000000-0000-0000-C000-000000000046" },
+        { typeof(IDXGIObject),            "aec22fb8-76f3-4639-9be0-28eb43a67a2e" },
+        { typeof(IDXGIAdapter),           "2411e7e1-12ac-4ccf-bd14-9798e8534dc0" },
+        { typeof(ID3D11Device),           "db6f6ddb-ac77-4e88-8253-819df9bbf140" },
+        { typeof(ID3D11DeviceContext),    "c0bfa96c-e089-44fb-8eaf-26f8796190da" },
+        { typeof(IDXGIOutput),            "ae02eedb-c735-4690-8d52-5a8dc20213aa" },
+        { typeof(IDXGIOutput1),           "00cddea8-939b-4b83-a340-a685226666cc" },
+        { typeof(IDXGIFactory),           "7b7166ec-21c7-44ae-b21a-c9ae321ae369" },
+        { typeof(IDXGIFactory1),          "770aae78-f26f-4dba-a829-253c83d1b387" },
+        { typeof(IDXGIOutputDuplication), "191cfac3-a341-470d-b26e-a864f428319c" },
+        { typeof(IDXGIDeviceSubObject),   "3d3e0379-f9de-4d58-bb6c-18d62992f1a6" },
+        { typeof(IDXGIResource),          "035f3ab4-482e-4e50-b41f-8a7f8bd8960b" },
+        { typeof(ID3D11Texture2D),        "6f15aaf2-d208-4e89-9ab4-489535d34f9c" },
+    };
 }
 
 public unsafe static partial class Extensions
@@ -86,7 +82,7 @@ unsafe partial class Extensions
         => ((delegate* unmanaged<IUnknown, IID*, void*, HResult>)self[0])(self.AsUnknown, &iid, obj);
 
     public static HResult QueryInterface<T>(this IIUnknown self, void* obj) where T : IIUnknown
-        => self.QueryInterface(GUID.TypeToIIDDictionary[typeof(T)], obj);
+        => self.QueryInterface(GUID.IIDS[typeof(T)], obj);
 
     public static HResult Release(this IIUnknown self)
         => ((delegate* unmanaged<IUnknown, HResult>)self[2])(self.AsUnknown);

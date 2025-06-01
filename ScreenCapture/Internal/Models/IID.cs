@@ -2,7 +2,7 @@
 public unsafe struct IID
 {
     public IID(Guid guid) => GUID = guid;
-    public IID(string guid) : this(new Guid(guid)) { }
+    public IID(string u16string) : this(new Guid(u16string)) { }
 
     public Guid GUID;
 

@@ -1,7 +1,4 @@
-﻿using System.Runtime.InteropServices;
-
-namespace ScreenCapture.DirectXModels.Mathematic;
-[StructLayout(LayoutKind.Sequential)]
+﻿namespace ScreenCapture.DirectXModels.Mathematic;
 public struct Rectangle
 {
     public int Left, Top, Right, Bottom;
