@@ -2,7 +2,6 @@
 using ScreenCapture.Internal;
 
 namespace ScreenCapture;
-
 public unsafe struct Duplicator
 {
     ID3D11Device device;

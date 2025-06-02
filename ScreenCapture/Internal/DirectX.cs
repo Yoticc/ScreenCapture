@@ -35,19 +35,19 @@ public static class GUID
 {
     public static readonly Dictionary<Type, IID> IIDS = new()
     {
-        { typeof(IUnknown),               "00000000-0000-0000-C000-000000000046" },
-        { typeof(IDXGIObject),            "aec22fb8-76f3-4639-9be0-28eb43a67a2e" },
-        { typeof(IDXGIAdapter),           "2411e7e1-12ac-4ccf-bd14-9798e8534dc0" },
-        { typeof(ID3D11Device),           "db6f6ddb-ac77-4e88-8253-819df9bbf140" },
-        { typeof(ID3D11DeviceContext),    "c0bfa96c-e089-44fb-8eaf-26f8796190da" },
-        { typeof(IDXGIOutput),            "ae02eedb-c735-4690-8d52-5a8dc20213aa" },
-        { typeof(IDXGIOutput1),           "00cddea8-939b-4b83-a340-a685226666cc" },
-        { typeof(IDXGIFactory),           "7b7166ec-21c7-44ae-b21a-c9ae321ae369" },
-        { typeof(IDXGIFactory1),          "770aae78-f26f-4dba-a829-253c83d1b387" },
-        { typeof(IDXGIOutputDuplication), "191cfac3-a341-470d-b26e-a864f428319c" },
-        { typeof(IDXGIDeviceSubObject),   "3d3e0379-f9de-4d58-bb6c-18d62992f1a6" },
-        { typeof(IDXGIResource),          "035f3ab4-482e-4e50-b41f-8a7f8bd8960b" },
-        { typeof(ID3D11Texture2D),        "6f15aaf2-d208-4e89-9ab4-489535d34f9c" },
+        { typeof(IUnknown),               "0000000000000000C000000000000046"u8 },
+        { typeof(IDXGIObject),            "aec22fb876f346399be028eb43a67a2e"u8 },
+        { typeof(IDXGIAdapter),           "2411e7e112ac4ccfbd149798e8534dc0"u8 },
+        { typeof(ID3D11Device),           "db6f6ddbac774e888253819df9bbf140"u8 },
+        { typeof(ID3D11DeviceContext),    "c0bfa96ce08944fb8eaf26f8796190da"u8 },
+        { typeof(IDXGIOutput),            "ae02eedbc73546908d525a8dc20213aa"u8 },
+        { typeof(IDXGIOutput1),           "00cddea8939b4b83a340a685226666cc"u8 },
+        { typeof(IDXGIFactory),           "7b7166ec21c744aeb21ac9ae321ae369"u8 },
+        { typeof(IDXGIFactory1),          "770aae78f26f4dbaa829253c83d1b387"u8 },
+        { typeof(IDXGIOutputDuplication), "191cfac3a341470db26ea864f428319c"u8 },
+        { typeof(IDXGIDeviceSubObject),   "3d3e0379f9de4d58bb6c18d62992f1a6"u8 },
+        { typeof(IDXGIResource),          "035f3ab4482e4e50b41f8a7f8bd8960b"u8 },
+        { typeof(ID3D11Texture2D),        "6f15aaf2d2084e899ab4489535d34f9c"u8 },
     };
 }
 
