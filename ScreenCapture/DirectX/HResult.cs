@@ -7,6 +7,7 @@ public unsafe struct HResult
     public uint Code;
 
     public bool IsSuccess => Code == 0;
+    public bool NoResult => Code == unchecked((uint)-1);
 
     public void CheckResult()
     {

@@ -1,6 +1,8 @@
 ﻿using ScreenCapture.DirectXModels;
+using ScreenCapture.Extensions;
 using ScreenCapture.Internal;
 
+#pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 namespace ScreenCapture;
 public unsafe struct Duplicator
 {
@@ -42,11 +44,12 @@ public unsafe struct Duplicator
                                 if (result = deviceContext.Map(texture, 0, MapType.Read, MapFlags.None, &subresource))
                                 {
                                     frame->FrameInfo = frameInfo;
-                                    frame->Bitmap = new TextureMemoryBitmap((TexturePixel*)subresource.Data, (int)textureDescription.Width, (int)textureDescription.Height);
+                                    frame->Bitmap = new MemoryBitmap((Color*)subresource.Data, (int)textureDescription.Width, (int)textureDescription.Height);
                                 }
                             }
                         }
                     }
+                    else result = new HResult { Code = unchecked((uint)-1) };
                 }
                 else
                 {

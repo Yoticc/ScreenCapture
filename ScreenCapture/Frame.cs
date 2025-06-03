@@ -1,6 +1,8 @@
-﻿namespace ScreenCapture;
+﻿using ScreenCapture.Extensions;
+
+namespace ScreenCapture;
 public struct Frame
 {
     public OutDuplFrameInfo FrameInfo;
-    public TextureMemoryBitmap Bitmap;
+    public MemoryBitmap Bitmap;
 }

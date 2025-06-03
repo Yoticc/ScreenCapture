@@ -1,6 +1,6 @@
 ﻿using ScreenCapture.Internal;
 
-namespace ScreenCapture;
+namespace ScreenCapture.Extensions;
 public unsafe class ScreenCapturer : IDisposable
 {
     public ScreenCapturer(uint screenIndex = 0)
