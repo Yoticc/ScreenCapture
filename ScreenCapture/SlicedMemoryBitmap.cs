@@ -13,12 +13,12 @@ public unsafe struct SlicedMemoryBitmap
     }
 
     public readonly MemoryBitmap Parent;
-    public readonly Color* Pixels;
+    public readonly Bpp32Color* Pixels;
     public readonly int ParentWidth, ParentHeight;
     public readonly int X, Y;
     public readonly int Width, Height;
 
-    public Color this[int x, int y]
+    public Bpp32Color this[int x, int y]
     {
         get => Pixels[(Y + y) * ParentWidth + X + x];
         set => Pixels[(Y + y) * ParentWidth + X + x] = value;

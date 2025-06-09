@@ -10,14 +10,14 @@ public unsafe struct MemoryBitmap
 {
     public MemoryBitmap(void* pixels, int width, int height)
     {
-        Pixels = (Color*)pixels;
+        Pixels = (Bpp32Color*)pixels;
         (Width, Height) = (width, height);
     }
 
-    public readonly Color* Pixels;
+    public readonly Bpp32Color* Pixels;
     public readonly int Width, Height;
 
-    public Color this[int x, int y]
+    public Bpp32Color this[int x, int y]
     {
         get => Pixels[y * Width + x];
         set => Pixels[y * Width + x] = value;
