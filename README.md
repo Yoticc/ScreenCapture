@@ -1,4 +1,4 @@
-Screen capturing via IDXGIOutputDuplication
+Screen capturing via DirectX
 -------------------------------------------
 Implementation of screen capture via DirectX using IDXGIOutputDuplication in C# without any dependencies. \
 Emphasis on perfomance, but unfortunately due to a language limitation is completely covered by boxing structures into interfaces.
