@@ -61,4 +61,8 @@ unsafe
         }
         else Console.WriteLine($"Failed to capture {counter}-th frame. HResult: {result}");
     }
+
+    device.Release();
+    screen.Release();
+    duplicator.Release();
 }
