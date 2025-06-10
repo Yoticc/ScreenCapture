@@ -100,12 +100,6 @@ unsafe partial class Extensions
     public static HResult CreateTexture2D(this IID3D11Device self, Texture2DDescription* description, ID3D11Texture2D* texture) 
         => CreateTexture2D(self.AsDevice, description, (SubresourceData*)null, texture);
 
-    public static HResult CreateTexture2D(this IID3D11Device self, Texture2DDescription* description, SubresourceData[] data, ID3D11Texture2D* texture)
-    {
-        fixed (SubresourceData* dataPointer = data)
-            return CreateTexture2D(self.AsDevice, description, dataPointer, texture);
-    }
-
     public static HResult CreateTexture2D(this IID3D11Device self, Texture2DDescription* description, SubresourceData* data, ID3D11Texture2D* texture)
         => ((delegate* unmanaged<ID3D11Device, Texture2DDescription*, SubresourceData*, ID3D11Texture2D*, HResult>)self[5])(self.AsDevice, description, data, texture);
 }
