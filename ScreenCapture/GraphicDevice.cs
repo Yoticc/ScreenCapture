@@ -4,11 +4,11 @@ using ScreenCapture.Internal;
 namespace ScreenCapture;
 public unsafe struct GraphicDevice
 {
-    public ID3D11Device Device;
-    public ID3D11DeviceContext Context;
+    public D3D11Device Device;
+    public D3D11DeviceContext Context;
     public FeatureLevel FeatureLevel;
-    public IDXGIFactory1 Factory;
-    public IDXGIAdapter Adapter;
+    public DXGIFactory1 Factory;
+    public DXGIAdapter Adapter;
 
     public void Release()
     {
@@ -32,8 +32,8 @@ public unsafe struct GraphicDevice
 
 public unsafe struct Screen
 {
-    public IDXGIOutput Output0;
-    public IDXGIOutput1 Output;
+    public DXGIOutput Output0;
+    public DXGIOutput1 Output;
     public OutputDescription Descriptor;
 
     public void Release()
@@ -47,7 +47,7 @@ public unsafe struct Screen
         HResult result;
        
         _ = (result = device->Adapter.EnumOutputs(index, &screen->Output0)) &&
-            (result = screen->Output0.QueryInterface<IDXGIOutput>(&screen->Output)) &&
+            (result = screen->Output0.QueryInterface<DXGIOutput>(&screen->Output)) &&
             (result = screen->Output.GetDescription(&screen->Descriptor));
 
         return result;

@@ -1,17 +1,16 @@
 ﻿using ScreenCapture.DirectXModels;
-using ScreenCapture.Extensions;
 using ScreenCapture.Internal;
 
 #pragma warning disable CS8500 // This takes the address of, gets the size of, or declares a pointer to a managed type
 namespace ScreenCapture;
 public unsafe struct Duplicator
 {
-    ID3D11Device device;
-    IDXGIOutput1 output;
-    ID3D11Texture2D texture;
-    ID3D11DeviceContext deviceContext;
+    D3D11Device device;
+    DXGIOutput1 output;
+    D3D11Texture2D texture;
+    D3D11DeviceContext deviceContext;
     Texture2DDescription textureDescription;
-    IDXGIOutputDuplication duplication;
+    DXGIOutputDuplication duplication;
     bool hasInitializedDuplication;
     bool hasInitializedFrame;
 
@@ -24,7 +23,7 @@ public unsafe struct Duplicator
         if (result = EnsureDuplicationIsInitialized())
         {
             OutDuplFrameInfo frameInfo;
-            IDXGIResource frameResource;
+            DXGIResource frameResource;
 
             if (result = ReleasePreviousFrame())
             {
@@ -35,8 +34,8 @@ public unsafe struct Duplicator
                     {
                         lastPresentTime = frameInfo.LastPresentTime;
 
-                        ID3D11Texture2D frameTexture;
-                        if (result = frameResource.QueryInterface<ID3D11Texture2D>(&frameTexture))
+                        D3D11Texture2D frameTexture;
+                        if (result = frameResource.QueryInterface<D3D11Texture2D>(&frameTexture))
                         {
                             if (result = deviceContext.CopyResource(frameTexture, texture))
                             {
@@ -126,6 +125,6 @@ public unsafe struct Duplicator
             Usage = Usage.Staging
         };
 
-        return device->Device.CreateTexture2D(&duplicator->textureDescription, &duplicator->texture);
+        return device->Device.CreateTexture2D(&duplicator->textureDescription, null, &duplicator->texture);
     }
 }
